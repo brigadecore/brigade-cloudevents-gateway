@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      {{- include "gateway.selectorLabels" . | nindent 6 }}
+      {{- include "gateway.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gateway.selectorLabels" . | nindent 8 }}
+        {{- include "gateway.labels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config-secret: {{ include (print $.Template.BasePath "/config-secret.yaml") . | sha256sum }}
+        {{- if .Values.tls.enabled }}
+        checksum/cert-secret: {{ include (print $.Template.BasePath "/cert-secret.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      containers:
+      - name: gateway
+        image: {{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: TLS_ENABLED
+          value: {{ quote .Values.tls.enabled }}
+        {{- if .Values.tls.enabled }}
+        - name: TLS_CERT_PATH
+          value: /app/certs/tls.crt
+        - name: TLS_KEY_PATH
+          value: /app/certs/tls.key
+        {{- end }}
+        - name: API_ADDRESS
+          value: {{ .Values.brigade.apiAddress }}
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "gateway.fullname" . }}
+              key: brigadeAPIToken
+        - name: API_IGNORE_CERT_WARNINGS
+          value: {{ quote .Values.brigade.apiIgnoreCertWarnings }}
+        - name: SOURCE_TOKENS_PATH
+          value: /app/config/source-tokens.json
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        {{- if .Values.tls.enabled }}
+        - name: cert
+          mountPath: /app/certs
+          readOnly: true
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            port: 8080
+            path: /healthz
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            port: 8080
+            path: /healthz
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: config
+        secret:
+          secretName: {{ include "gateway.fullname" . }}-config
+      {{- if .Values.tls.enabled }}
+      - name: cert
+        secret:
+          secretName: {{ include "gateway.fullname" . }}-cert
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

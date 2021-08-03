@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/brigadecore/brigade/v2/v2/apiserver/schemas/project.json
+apiVersion: brigade.sh/v2-beta
+kind: Project
+metadata:
+  id: brigade-cloudevents-gateway
+description: Brigade CloudEvents Gateway built with Brigade 2!
+spec:
+  eventSubscriptions:
+  - source: brigade.sh/github
+    qualifiers:
+      repo: brigadecore/brigade-cloudevents-gateway
+    types:
+    - check_run:rerequested
+    - check_suite:requested
+    - check_suite:rerequested
+    - push
+  workerTemplate:
+    git:
+      cloneURL: https://github.com/brigadecore/brigade-cloudevents-gateway.git

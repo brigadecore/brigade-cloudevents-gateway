@@ -1,0 +1,12 @@
+.gocache/
+coverage.txt
+charts/brigade-cloudevents-gateway/charts
+.DS_Store
+.brigade/node_modules/
+.brigade/secrets.yaml
+
+# IDEs
+.vscode/
+.devcontainer/
+.idea/
+.swp

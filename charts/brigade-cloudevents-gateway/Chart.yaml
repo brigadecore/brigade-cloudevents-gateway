@@ -1,0 +1,12 @@
+apiVersion: v2
+name: brigade-cloudevents-gateway
+description: |
+  The Brigade CloudEvents Gateway
+type: application
+version: 0.1.0
+appVersion: v0.1.0
+sources:
+- https://github.com/brigadecore/brigade-cloudevents-gateway
+maintainers:
+- name: The Brigade Maintainers
+  email: cncf-brigade-maintainers@lists.cncf.io
