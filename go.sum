@@ -1,5 +1,5 @@
-github.com/brigadecore/brigade-foundations v0.2.0 h1:pUtIQgN5Qa1I5JjpJOu+9E7J/kXC/QY2fzdGZt/I50I=
-github.com/brigadecore/brigade-foundations v0.2.0/go.mod h1:edMgSJCUgfHN1RNGiiVOTRW4X4VykBLgssgWHPZK7Sg=
+github.com/brigadecore/brigade-foundations v0.3.0 h1:galsMzxSprURAEc2pxsmYJandiW4D+Npchx6ZiBIHkY=
+github.com/brigadecore/brigade-foundations v0.3.0/go.mod h1:edMgSJCUgfHN1RNGiiVOTRW4X4VykBLgssgWHPZK7Sg=
 github.com/brigadecore/brigade/sdk/v2 v2.0.0-beta.1 h1:diVZz6uGMAS2eImx39A15ZRP2eoitiC4TbhcgNVUwIg=
 github.com/brigadecore/brigade/sdk/v2 v2.0.0-beta.1/go.mod h1:rB3y/pIheORX5AHbxaSAw5Xr/U6bUAUtSLkgJcbOHIY=
 github.com/cloudevents/sdk-go/v2 v2.4.1 h1:rZJoz9QVLbWQmnvLPDFEmv17Czu+CfSPwMO6lhJ72xQ=
