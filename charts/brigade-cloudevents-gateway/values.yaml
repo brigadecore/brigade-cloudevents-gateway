@@ -1,0 +1,127 @@
+## Default values for brigade-cloudevents-gateway
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+
+replicas: 1
+
+## Host should be set to the public IP address or DNS hostname for this
+## gateway. Whenever possible, it should be set accurately for a variety of
+## reasons. If applicable, the value is used both in automatic certificate
+## generation and, also if applicable, the creation of ingress routing rules
+## (advanced). Keeping the default value or otherwise setting this
+## inaccurately may result in invalid routing rules or untrusted certificates
+## (untrusted beyond merely having been self-signed).
+host: cloudevents.example.com
+
+image:
+  repository: brigadecore/brigade-cloudevents-gateway
+  ## tag should only be specified if you want to override Chart.appVersion
+  ## The default tag is the value of .Chart.AppVersion
+  # tag:
+  pullPolicy: IfNotPresent
+
+tls:
+  ## Whether to enable TLS. If true then you MUST do ONE of three things to
+  ## ensure the existence of a TLS certificate:
+  ##
+  ## 1. Set generateSelfSignedCert below to true (the default)
+  ## 2. OR Set values for BOTH the cert and key fields below
+  ## 3. OR create a cert secret named <Helm release name>-cert in
+  ##    the same namespace as Brigade CloudEvents Gateway. This secret could be
+  ##    created manually or through other means, such as a cert manager.
+  enabled: false
+  ## Whether to generate a self-signed certificate. If true, a new certificate
+  ## will be generated for every revision of the corresponding Helm release.
+  ## Since the certificate is self-signed, it will not be trusted by clients
+  ## and should absolutely not be used for production, but having this enabled
+  ## as a default effectively discourages the more heavy-handed option to
+  ## disable TLS entirely. If TLS is enabled and cert generation is DISABLED,
+  ## users MUST provide their own cert and private key below OR create a cert
+  ## secret named <Helm release name>-cert in the same namespace as
+  ## the gateway.
+  generateSelfSignedCert: true
+  # cert: base 64 encoded cert goes here
+  # key: base 64 encoded key goes here
+
+ingress:
+  ## Whether to enable ingress. By default, this is disabled and the gateway's
+  ## service is of type LoadBalancer instead. Enabling ingress is advanced
+  ## usage.
+  enabled: false
+  ## Optionally use annotations specified by your ingress controller's
+  ## documentation to customize the behavior of the ingress resource.
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+  tls:
+    ## Whether to enable TLS. If true then you MUST do ONE of three things to
+    ## ensure the existence of a TLS certificate:
+    ##
+    ## 1. Set generateSelfSignedCert below to true (the default)
+    ## 2. OR Set values for BOTH the cert and key fields below
+    ## 3. OR create a cert secret named
+    ##    <Helm release name>-ingress-cert in the same namespace as the gateway.
+    ##    This secret could be created manually or through other means, such as
+    ##    a cert manager.
+    ##
+    ## Note there is a wide disparity in the feature set of various ingress
+    ## controllers and some ingress controllers may be able to provision a
+    ## certificate for you even with TLS disabled here. Consult your ingress
+    ## controller's documentation.
+    enabled: true
+    ## Whether to generate a self-signed certificate. If true, a new
+    ## certificate will be generated for every revision of the corresponding
+    ## Helm release. Since the certificate is self-signed, it will not be
+    ## trusted by clients and should absolutely not be used for production,
+    ## but having this enabled as a default effectively discourages the more
+    ## heavy-handed option to disable TLS entirely. If ingress TLS is enabled
+    ## and cert generation is DISABLED, users MUST provide their own cert and
+    ## private key below OR create a cert secret named
+    ## <Helm release name>-ingres-cert in the same namespace as the gateway.
+    generateSelfSignedCert: true
+    # cert: base 64 encoded cert goes here
+    # key: base 64 encoded key goes here
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as
+  # a conscious choice for the user. This also increases chances charts run on
+  # environments with little resources, such as Minikube. If you do want to
+  # specify resources, uncomment the following lines, adjust them as
+  # necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+service:
+  ## If you're going to use an ingress controller, you can change the service
+  ## type to CLusterIP.
+  type: LoadBalancer
+  # nodePort: 31700
+
+brigade:
+  ## Address of your Brigade 2 API server, including leading protocol (http://
+  ## or https://)
+  apiAddress: https://brigade-apiserver.brigade.svc.cluster.local
+  ## API token belonging to a Brigade 2 service account
+  ##
+  ## For reference, these are the commands for creating a service account for
+  ## this gateway, with proper permissions:
+  ##
+  ## $ brig service-account create --id brigade-cloudevents-gateway --description brigade-cloudevents-gateway
+  ## $ brig role grant READER --service-account brigade-cloudevents-gateway
+  ## $ brig role grant EVENT_CREATOR --service-account brigade-cloudevents-gateway --source brigade.sh/cloudevents
+  apiToken:
+  ## Whether to ignore cert warning from the API server
+  apiIgnoreCertWarnings: true
+
+## The tokens field maps CloudEvent sources to corresponding tokens (shared
+## secrets) that clients must use to authenticate when submitting CloudEvents.
+tokens: {}
+  ## Example:
+  # example/uri: MySharedSecret

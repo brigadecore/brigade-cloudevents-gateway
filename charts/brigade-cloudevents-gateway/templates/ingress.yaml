@@ -1,0 +1,49 @@
+{{- if .Values.ingress.enabled }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+    {{- include "gateway.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  rules:
+  - host: {{ .Values.host }}
+    http:
+      paths:
+      {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+      - pathType: ImplementationSpecific
+        path: /
+        backend:
+          service:
+            name: {{ include "gateway.fullname" . }}
+            port:
+              {{- if .Values.tls.enabled }}
+              number: 443
+              {{- else }}
+              number: 80
+              {{- end }}
+      {{- else }}
+      - backend:
+          serviceName: {{ include "gateway.fullname" . }}
+          {{- if .Values.tls.enabled }}
+          servicePort: 443
+          {{- else }}
+          servicePort: 80
+          {{- end }}
+      {{- end}}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.host }}
+    secretName: {{ include "gateway.fullname" . }}-ingress-cert
+  {{- end }}
+{{- end }}
