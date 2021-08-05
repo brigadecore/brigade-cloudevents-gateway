@@ -66,8 +66,8 @@ To fetch the Brigade CloudEvents Gateway chart from the registry:
 
 ```console
   export HELM_EXPERIMENTAL_OCI=1
-  helm chart pull ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.2.0
-  helm chart export ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.2.0 -d ~/charts
+  helm chart pull ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.1.0
+  helm chart export ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.1.0 -d ~/charts
 ```
 
 As this chart requires custom configuration as described above to function
