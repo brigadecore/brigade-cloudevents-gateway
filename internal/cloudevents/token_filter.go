@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/brigadecore/brigade-cloudevents-gateway/internal/crypto"
+	"github.com/brigadecore/brigade-foundations/crypto"
 	libHTTP "github.com/brigadecore/brigade-foundations/http"
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cloudHTTP "github.com/cloudevents/sdk-go/v2/protocol/http"

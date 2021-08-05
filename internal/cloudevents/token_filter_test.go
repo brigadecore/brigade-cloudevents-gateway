@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/brigadecore/brigade-cloudevents-gateway/internal/crypto"
+	"github.com/brigadecore/brigade-foundations/crypto"
 	"github.com/stretchr/testify/require"
 )
 
