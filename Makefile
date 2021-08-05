@@ -141,8 +141,8 @@ push:
 		kaniko \
 			--build-arg VERSION="$(VERSION)" \
 			--build-arg COMMIT="$(GIT_VERSION)" \
-			--dockerfile /workspaces/cloudevents-gateway/Dockerfile \
-			--context dir:///workspaces/cloudevents-gateway/ \
+			--dockerfile /workspaces/brigade-cloudevents-gateway/Dockerfile \
+			--context dir:///workspaces/brigade-cloudevents-gateway/ \
 			--destination $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
 			--destination $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG) \
 	'
