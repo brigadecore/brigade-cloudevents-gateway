@@ -87,8 +87,8 @@ const publishChartJob = (event: Event) => {
 jobs[publishChartJobName] = publishChartJob
 
 // Run the entire suite of tests WITHOUT publishing anything initially. If
-// EVERYTHING passes AND this was a push (merge, presumably) to the master
-// branch, then publish an "edge" image.
+// EVERYTHING passes AND this was a push (merge, presumably) to the main branch,
+// then publish an "edge" image.
 async function runSuite(event: Event): Promise<void> {
   await new SerialGroup(
     new ConcurrentGroup( // Basic tests
@@ -98,7 +98,7 @@ async function runSuite(event: Event): Promise<void> {
     ),
     buildJob(event)
   ).run()
-  if (event.worker?.git?.ref == "master") {
+  if (event.worker?.git?.ref == "main") {
     // Push "edge" images.
     //
     // npm packages MUST be semantically versioned, so we DON'T publish an
