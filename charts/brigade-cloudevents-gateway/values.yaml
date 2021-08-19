@@ -114,7 +114,6 @@ brigade:
   ## this gateway, with proper permissions:
   ##
   ## $ brig service-account create --id brigade-cloudevents-gateway --description brigade-cloudevents-gateway
-  ## $ brig role grant READER --service-account brigade-cloudevents-gateway
   ## $ brig role grant EVENT_CREATOR --service-account brigade-cloudevents-gateway --source brigade.sh/cloudevents
   apiToken:
   ## Whether to ignore cert warning from the API server
