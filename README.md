@@ -57,17 +57,17 @@ gateways._
 
 For now, we're using the [GitHub Container Registry](https://ghcr.io) (which is
 an [OCI registry](https://helm.sh/docs/topics/registries/)) to host our Helm
-chart. Helm 3 has _experimental_ support for OCI registries. In the event that
-the Helm 3 dependency proves troublesome for users, or in the event that this
+chart. Helm 3.7 has _experimental_ support for OCI registries. In the event that
+the Helm 3.7 dependency proves troublesome for users, or in the event that this
 experimental feature goes away, or isn't working like we'd hope, we will revisit
 this choice before going GA.
 
-To fetch the Brigade CloudEvents Gateway chart from the registry:
+First, be sure you are using
+[Helm 3.7.0-rc.1](https://github.com/helm/helm/releases/tag/v3.7.0-rc.1) and
+enable experimental OCI support:
 
 ```console
-  export HELM_EXPERIMENTAL_OCI=1
-  helm chart pull ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.1.0
-  helm chart export ghcr.io/brigadecore/brigade-cloudevents-gateway:v0.1.0 -d ~/charts
+$ export HELM_EXPERIMENTAL_OCI=1
 ```
 
 As this chart requires custom configuration as described above to function
@@ -77,10 +77,11 @@ Use the following command to extract the full set of configuration options into
 a file you can modify:
 
 ```console
-$ helm inspect values ~/charts/brigade-cloudevents-gateway > my-values.yaml
+$ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
+  --version v0.2.0 > ~/brigade-cloudevents-gateway-values.yaml
 ```
 
-Edit `my-values.yaml`, making the following changes:
+Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
 
 * `brigade.apiAddress`: Address of the Brigade API server, beginning with
   `https://`
@@ -100,14 +101,16 @@ Edit `my-values.yaml`, making the following changes:
   For the example in sections 4 and 5 below, edit the token so that source
   `example/uri` authenticates using the token (shared secret) `MySharedSecret`.
 
-Save your changes to `my-values.yaml` and use the following command to install
+Save your changes to `~/brigade-cloudevents-gateway-values.yaml` and use the following command to install
 the gateway using the above customizations:
 
 ```console
-$ helm install brigade-cloudevents-gateway ~/charts/brigade-cloudevents-gateway \
+$ helm install brigade-cloudevents-gateway \
+    oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
+    --version v0.2.0 \
     --create-namespace \
     --namespace brigade-cloudevents-gateway \
-    --values my-values.yaml
+    --values ~/brigade-cloudevents-gateway-values.yaml
 ```
 
 ### 3. (RECOMMENDED) Create a DNS Entry
