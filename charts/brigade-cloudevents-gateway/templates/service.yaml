@@ -20,4 +20,3 @@ spec:
     protocol: TCP
   selector:
     {{- include "gateway.selectorLabels" . | nindent 8 }}
-    {{- include "gateway.labels" . | nindent 8 }}
