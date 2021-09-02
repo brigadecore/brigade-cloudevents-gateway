@@ -1,9 +1,7 @@
 package main
 
-// nolint: lll
 import (
 	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents"
@@ -45,7 +43,7 @@ func TestAPIClientConfig(t *testing.T) {
 		{
 			name: "API_TOKEN not set",
 			setup: func() {
-				os.Setenv("API_ADDRESS", "foo")
+				t.Setenv("API_ADDRESS", "foo")
 			},
 			assertions: func(
 				_ string,
@@ -61,8 +59,8 @@ func TestAPIClientConfig(t *testing.T) {
 		{
 			name: "success",
 			setup: func() {
-				os.Setenv("API_TOKEN", "bar")
-				os.Setenv("API_IGNORE_CERT_WARNINGS", "true")
+				t.Setenv("API_TOKEN", "bar")
+				t.Setenv("API_IGNORE_CERT_WARNINGS", "true")
 			},
 			assertions: func(
 				address string,
@@ -103,7 +101,7 @@ func TestTokenFilterConfig(t *testing.T) {
 		{
 			name: "SOURCE_TOKENS_PATH path does not exist",
 			setup: func() {
-				os.Setenv("SOURCE_TOKENS_PATH", "/completely/bogus/path")
+				t.Setenv("SOURCE_TOKENS_PATH", "/completely/bogus/path")
 			},
 			assertions: func(_ cloudevents.TokenFilterConfig, err error) {
 				require.Error(t, err)
@@ -122,7 +120,7 @@ func TestTokenFilterConfig(t *testing.T) {
 				defer tokensFile.Close()
 				_, err = tokensFile.Write([]byte("this is not json"))
 				require.NoError(t, err)
-				os.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
+				t.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
 			},
 			assertions: func(_ cloudevents.TokenFilterConfig, err error) {
 				require.Error(t, err)
@@ -139,7 +137,7 @@ func TestTokenFilterConfig(t *testing.T) {
 				defer tokensFile.Close()
 				_, err = tokensFile.Write([]byte(`{"foo": "bar"}`))
 				require.NoError(t, err)
-				os.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
+				t.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
 			},
 			assertions: func(config cloudevents.TokenFilterConfig, err error) {
 				require.NoError(t, err)
@@ -166,7 +164,7 @@ func TestServerConfig(t *testing.T) {
 		{
 			name: "PORT not an int",
 			setup: func() {
-				os.Setenv("PORT", "foo")
+				t.Setenv("PORT", "foo")
 			},
 			assertions: func(_ http.ServerConfig, err error) {
 				require.Error(t, err)
@@ -177,8 +175,8 @@ func TestServerConfig(t *testing.T) {
 		{
 			name: "TLS_ENABLED not a bool",
 			setup: func() {
-				os.Setenv("PORT", "8080")
-				os.Setenv("TLS_ENABLED", "nope")
+				t.Setenv("PORT", "8080")
+				t.Setenv("TLS_ENABLED", "nope")
 			},
 			assertions: func(_ http.ServerConfig, err error) {
 				require.Error(t, err)
@@ -189,7 +187,7 @@ func TestServerConfig(t *testing.T) {
 		{
 			name: "TLS_CERT_PATH required but not set",
 			setup: func() {
-				os.Setenv("TLS_ENABLED", "true")
+				t.Setenv("TLS_ENABLED", "true")
 			},
 			assertions: func(_ http.ServerConfig, err error) {
 				require.Error(t, err)
@@ -200,7 +198,7 @@ func TestServerConfig(t *testing.T) {
 		{
 			name: "TLS_KEY_PATH required but not set",
 			setup: func() {
-				os.Setenv("TLS_CERT_PATH", "/var/ssl/cert")
+				t.Setenv("TLS_CERT_PATH", "/var/ssl/cert")
 			},
 			assertions: func(_ http.ServerConfig, err error) {
 				require.Error(t, err)
@@ -211,7 +209,7 @@ func TestServerConfig(t *testing.T) {
 		{
 			name: "success",
 			setup: func() {
-				os.Setenv("TLS_KEY_PATH", "/var/ssl/key")
+				t.Setenv("TLS_KEY_PATH", "/var/ssl/key")
 			},
 			assertions: func(config http.ServerConfig, err error) {
 				require.NoError(t, err)
