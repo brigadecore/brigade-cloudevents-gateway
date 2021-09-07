@@ -1,5 +1,7 @@
 # Brigade CloudEvents Gateway
 
+[![codecov](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway/branch/main/graph/badge.svg?token=PM7LG36RGY)](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway)
+
 This is a work-in-progress
 [Brigade 2](https://github.com/brigadecore/brigade/tree/v2)
 compatible gateway that receives [CloudEvents](https://cloudevents.io/) over 

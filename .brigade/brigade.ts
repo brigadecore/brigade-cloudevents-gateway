@@ -7,10 +7,10 @@ const kanikoImg = "brigadecore/kaniko:v0.2.0"
 const helmImg = "brigadecore/helm-tools:v0.2.0"
 const localPath = "/workspaces/brigade-cloudevents-gateway"
 
-// MakeTargetJob is just a job wrapper around a make target.
+// MakeTargetJob is just a job wrapper around one or more make targets.
 class MakeTargetJob extends Job {
-  constructor(target: string, img: string, event: Event, env?: {[key: string]: string}) {
-    super(target, img, event)
+  constructor(targets: string[], img: string, event: Event, env?: {[key: string]: string}) {
+    super(targets[0], img, event)
     this.primaryContainer.sourceMountPath = localPath
     this.primaryContainer.workingDirectory = localPath
     this.primaryContainer.environment = env || {}
@@ -22,14 +22,14 @@ class MakeTargetJob extends Job {
       }
     }
     this.primaryContainer.command = [ "make" ]
-    this.primaryContainer.arguments = [ target ]
+    this.primaryContainer.arguments = targets
   }
 }
 
 // PushImageJob is a specialized job type for publishing Docker images.
 class PushImageJob extends MakeTargetJob {
   constructor(target: string, event: Event) {
-    super(target, kanikoImg, event, {
+    super([target], kanikoImg, event, {
       "DOCKER_ORG": event.project.secrets.dockerhubOrg,
       "DOCKER_USERNAME": event.project.secrets.dockerhubUsername,
       "DOCKER_PASSWORD": event.project.secrets.dockerhubPassword
@@ -45,19 +45,21 @@ const jobs: {[key: string]: (event: Event) => Job } = {}
 
 const testUnitJobName = "test-unit"
 const testUnitJob = (event: Event) => {
-  return new MakeTargetJob(testUnitJobName, goImg, event)
+  return new MakeTargetJob([testUnitJobName, "upload-code-coverage"], goImg, event, {
+    "CODECOV_TOKEN": event.project.secrets.codecovToken
+  })
 }
 jobs[testUnitJobName] = testUnitJob
 
 const lintJobName = "lint"
 const lintJob = (event: Event) => {
-  return new MakeTargetJob(lintJobName, goImg, event)
+  return new MakeTargetJob([lintJobName], goImg, event)
 }
 jobs[lintJobName] = lintJob
 
 const lintChartJobName = "lint-chart"
 const lintChartJob = (event: Event) => {
-  return new MakeTargetJob(lintChartJobName, helmImg, event)
+  return new MakeTargetJob([lintChartJobName], helmImg, event)
 }
 jobs[lintChartJobName] = lintChartJob
 
@@ -65,7 +67,7 @@ jobs[lintChartJobName] = lintChartJob
 
 const buildJobName = "build"
 const buildJob = (event: Event) => {
-  return new MakeTargetJob(buildJobName, kanikoImg, event)
+  return new MakeTargetJob([buildJobName], kanikoImg, event)
 }
 jobs[buildJobName] = buildJob
 
@@ -77,7 +79,7 @@ jobs[pushJobName] = pushJob
 
 const publishChartJobName = "publish-chart"
 const publishChartJob = (event: Event) => {
-  return new MakeTargetJob(publishChartJobName, helmImg, event, {
+  return new MakeTargetJob([publishChartJobName], helmImg, event, {
     "HELM_REGISTRY": event.project.secrets.helmRegistry || "ghcr.io",
     "HELM_ORG": event.project.secrets.helmOrg,
     "HELM_USERNAME": event.project.secrets.helmUsername,
