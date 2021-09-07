@@ -1,6 +1,7 @@
 # Brigade CloudEvents Gateway
 
 [![codecov](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway/branch/main/graph/badge.svg?token=PM7LG36RGY)](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway)
+[![Go Report Card](https://goreportcard.com/badge/github.com/brigadecore/brigade-cloudevents-gateway)](https://goreportcard.com/report/github.com/brigadecore/brigade-cloudevents-gateway)
 
 This is a work-in-progress
 [Brigade 2](https://github.com/brigadecore/brigade/tree/v2)
