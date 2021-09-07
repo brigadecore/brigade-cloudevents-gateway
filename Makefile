@@ -16,7 +16,7 @@ GIT_VERSION = $(shell git describe --always --abbrev=7 --dirty --match=NeVeRmAtC
 
 ifneq ($(SKIP_DOCKER),true)
 	PROJECT_ROOT := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-	GO_DEV_IMAGE := brigadecore/go-tools:v0.3.0
+	GO_DEV_IMAGE := brigadecore/go-tools:v0.4.0
 
 	GO_DOCKER_CMD := docker run \
 		-it \
@@ -120,9 +120,7 @@ lint-chart:
 
 .PHONY: upload-code-coverage
 upload-code-coverage:
-	$(GO_DOCKER_CMD) bash -c ' \
-		bash <(curl -s https://codecov.io/bash) \
-	'
+	$(GO_DOCKER_CMD) codecov
 
 ################################################################################
 # Build                                                                        #
