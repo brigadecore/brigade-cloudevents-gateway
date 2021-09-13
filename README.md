@@ -86,6 +86,9 @@ $ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
 
 Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
 
+* `host`: Set this to the host name where you'd like the gateway to be
+  accessible.
+
 * `brigade.apiAddress`: Address of the Brigade API server, beginning with
   `https://`
 
