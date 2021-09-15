@@ -82,10 +82,13 @@ a file you can modify:
 
 ```console
 $ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
-  --version v0.2.0 > ~/brigade-cloudevents-gateway-values.yaml
+    --version v0.2.0 > ~/brigade-cloudevents-gateway-values.yaml
 ```
 
 Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
+
+* `host`: Set this to the host name where you'd like the gateway to be
+  accessible.
 
 * `brigade.apiAddress`: Address of the Brigade API server, beginning with
   `https://`
@@ -124,8 +127,8 @@ this command should help you find the gateway's public IP address:
 
 ```console
 $ kubectl get svc brigade-cloudevents-gateway \
-  --namespace brigade-cloudevents-gateway \
-  --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    --namespace brigade-cloudevents-gateway \
+    --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
 If you overrode defaults and enabled support for an ingress controller, you
@@ -181,12 +184,12 @@ subscribed to by the example project in the previous section:
 
 ```console
 $ curl -i -k -X POST \
-  -H "ce-specversion: 1.0" \
-  -H "ce-id: 1234-1234-1234" \
-  -H "ce-source: example/uri" \
-  -H "ce-type: example.type" \
-  -H "Authorization: Bearer MySharedSecret" \
-  https://<public IP or host name here>/events
+    -H "ce-specversion: 1.0" \
+    -H "ce-id: 1234-1234-1234" \
+    -H "ce-source: example/uri" \
+    -H "ce-type: example.type" \
+    -H "Authorization: Bearer MySharedSecret" \
+    https://<public IP or host name here>/events
 ```
 
 If the gateway accepts the request, output will look like this:
