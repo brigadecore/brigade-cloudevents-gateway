@@ -4,7 +4,7 @@ const releaseTagRegex = /^refs\/tags\/(v[0-9]+(?:\.[0-9]+)*(?:\-.+)?)$/
 
 const goImg = "brigadecore/go-tools:v0.4.0"
 const kanikoImg = "brigadecore/kaniko:v0.2.0"
-const helmImg = "brigadecore/helm-tools:v0.2.0"
+const helmImg = "brigadecore/helm-tools:v0.4.0"
 const localPath = "/workspaces/brigade-cloudevents-gateway"
 
 // MakeTargetJob is just a job wrapper around one or more make targets.
