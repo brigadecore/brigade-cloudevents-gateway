@@ -4,10 +4,14 @@
 [![codecov](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway/branch/main/graph/badge.svg?token=PM7LG36RGY)](https://codecov.io/gh/brigadecore/brigade-cloudevents-gateway)
 [![Go Report Card](https://goreportcard.com/badge/github.com/brigadecore/brigade-cloudevents-gateway)](https://goreportcard.com/report/github.com/brigadecore/brigade-cloudevents-gateway)
 
+<img width="100" align="left" src="logo.png">
+
 This is a work-in-progress
 [Brigade 2](https://github.com/brigadecore/brigade/tree/v2)
 compatible gateway that receives [CloudEvents](https://cloudevents.io/) over 
 HTTP/S and propagates them into Brigade 2's event bus.
+
+<br clear="left"/>
 
 ## Installation
 
