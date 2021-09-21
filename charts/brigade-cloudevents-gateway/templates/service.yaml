@@ -6,7 +6,6 @@ metadata:
     {{- include "gateway.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
-  externalTrafficPolicy: Local
   ports:
   {{- if .Values.tls.enabled }}
   - port: 443
