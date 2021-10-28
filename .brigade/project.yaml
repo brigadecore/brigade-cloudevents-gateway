@@ -17,3 +17,5 @@ spec:
   workerTemplate:
     git:
       cloneURL: https://github.com/brigadecore/brigade-cloudevents-gateway.git
+    jobPolicies:
+      allowPrivileged: true
