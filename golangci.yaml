@@ -6,20 +6,25 @@ run:
 linters:
   disable-all: true
   enable:
+  - bodyclose
   - depguard
   # - dupl
   - errcheck
+  - exportloopref
+  - forcetypeassert
   - goconst
   - gocyclo
   - gofmt
   - goimports
   - golint
+  - gosec
   - govet
   - lll
   # - maligned
   - misspell
   - nakedret
   - prealloc
+  - unconvert
   - unparam
   - unused
 
