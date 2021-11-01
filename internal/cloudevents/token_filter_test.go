@@ -18,6 +18,7 @@ func TestNewTokenFilterConfig(t *testing.T) {
 func TestAddToken(t *testing.T) {
 	const testSource = "foo"
 	const testToken = "bar"
+	// nolint: forcetypeassert
 	config := NewTokenFilterConfig().(*tokenFilterConfig)
 	config.AddToken(testSource, testToken)
 	hashedToken, ok :=
@@ -33,6 +34,7 @@ func TestAddToken(t *testing.T) {
 func TestGetHashedToken(t *testing.T) {
 	const testSource = "foo"
 	testHashedToken := crypto.Hash(testSource, "bar")
+	// nolint: forcetypeassert
 	config := NewTokenFilterConfig().(*tokenFilterConfig)
 	config.hashedTokensBySource[testSource] = testHashedToken
 	hashedToken, ok := config.getHashedToken(testSource)
@@ -42,7 +44,7 @@ func TestGetHashedToken(t *testing.T) {
 
 func TestNewTokenFilter(t *testing.T) {
 	testConfig := NewTokenFilterConfig()
-	filter := NewTokenFilter(testConfig).(*tokenFilter)
+	filter := NewTokenFilter(testConfig).(*tokenFilter) // nolint: forcetypeassert
 	require.Equal(t, testConfig, filter.config)
 }
 
