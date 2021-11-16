@@ -100,6 +100,10 @@ Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
 
 * `brigade.apiToken`: Service account token from step 2
 
+* `service.type`: If you plan to enable ingress (advanced), you can leave this
+  as its default -- `ClusterIP`. If you do not plan to enable ingress, you
+  probably will want to change this value to `LoadBalancer`.
+
 * `tokens`: This field should map CloudEvent sources to tokens (shared secrets)
   that can be used by clients to send cloud events for each source.
   
@@ -122,13 +126,15 @@ $ helm install brigade-cloudevents-gateway \
     --version v0.2.0 \
     --create-namespace \
     --namespace brigade-cloudevents-gateway \
-    --values ~/brigade-cloudevents-gateway-values.yaml
+    --values ~/brigade-cloudevents-gateway-values.yaml \
+    --wait \
+    --timeout 300s
 ```
 
 ### 3. (RECOMMENDED) Create a DNS Entry
 
-If you installed the gateway without enabling support for an ingress controller,
-this command should help you find the gateway's public IP address:
+If you overrode defaults and set `service.type` to `LoadBalancer`, use this
+command to find the gateway's public IP address:
 
 ```console
 $ kubectl get svc brigade-cloudevents-gateway \
