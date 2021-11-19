@@ -156,7 +156,7 @@ listen for CloudEvents that were sent to your gateway and, in turn, emitted into
 Brigade's event bus:
 
 ```yaml
-apiVersion: brigade.sh/v2-beta
+apiVersion: brigade.sh/v2
 kind: Project
 metadata:
   id: cloudevents-demo
