@@ -1,3 +1,43 @@
+{{- $tlsCert := "" }}
+{{- $tlsKey := "" }}
+{{- if .Values.tls.enabled }} 
+  {{- if .Values.tls.generateSelfSignedCert }}
+    {{- $data := (lookup "v1" "Secret" .Release.Namespace (printf "%s-cert" (include "gateway.fullname" . ))).data }}
+    {{- if $data }}
+      # Reuse the existing cert and key
+      {{- $tlsCert = index $data "tls.crt" }}
+      {{- $tlsKey = index $data "tls.key" }}
+    {{- else }}
+      # Generate a new cert and key
+      {{- $altName1 := include "gateway.fullname" . }}
+      {{- $altName2 := printf "%s.%s" (include "gateway.fullname" .) .Release.Namespace }}
+      {{- $altName3 := printf "%s.%s.svc" (include "gateway.fullname" .) .Release.Namespace }}
+      {{- $altName4 := printf "%s.%s.svc.cluster" (include "gateway.fullname" .) .Release.Namespace }}
+      {{- $altName5 := printf "%s.%s.svc.cluster.local" (include "gateway.fullname" .) .Release.Namespace }}
+      {{- $cert := genSelfSignedCert .Values.host nil (list .Values.host $altName1 $altName2 $altName3 $altName4 $altName5) 3650 }}
+      {{- $tlsCert = b64enc $cert.Cert }}
+      {{- $tlsKey = b64enc $cert.Key }}
+    {{- end }}
+  {{- else if .Values.tls.cert }}
+    # Use operator supplied cert and key
+    {{- $tlsCert = .Values.tls.cert }}
+    {{- $tlsKey = .Values.tls.key }}
+  {{- end }}
+{{- end }}
+---
+{{- if and .Values.tls.enabled (or .Values.tls.generateSelfSignedCert .Values.tls.cert) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "gateway.fullname" . }}-cert
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+type: Opaque
+data:
+  tls.crt: {{ $tlsCert }}
+  tls.key: {{ $tlsKey }}
+{{- end }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,8 +56,9 @@ spec:
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         checksum/config-secret: {{ include (print $.Template.BasePath "/config-secret.yaml") . | sha256sum }}
-        {{- if .Values.tls.enabled }}
-        checksum/cert-secret: {{ include (print $.Template.BasePath "/cert-secret.yaml") . | sha256sum }}
+        {{- if and .Values.tls.enabled (or .Values.tls.generateSelfSignedCert .Values.tls.cert) }}
+        checksum/tls-cert: {{ sha256sum $tlsCert }}
+        checksum/tls-key: {{ sha256sum $tlsKey }}
         {{- end }}
     spec:
       containers:

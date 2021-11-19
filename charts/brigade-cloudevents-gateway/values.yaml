@@ -29,7 +29,7 @@ tls:
   ## 3. OR create a cert secret named <Helm release name>-cert in
   ##    the same namespace as Brigade CloudEvents Gateway. This secret could be
   ##    created manually or through other means, such as a cert manager.
-  enabled: false
+  enabled: true
   ## Whether to generate a self-signed certificate. If true, a new certificate
   ## will be generated for every revision of the corresponding Helm release.
   ## Since the certificate is self-signed, it will not be trusted by clients
