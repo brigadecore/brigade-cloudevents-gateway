@@ -1,7 +1,5 @@
 import { events, Event, Job, ConcurrentGroup, SerialGroup, Container } from "@brigadecore/brigadier"
 
-const releaseTagRegex = /^refs\/tags\/(v[0-9]+(?:\.[0-9]+)*(?:\-.+)?)$/
-
 const goImg = "brigadecore/go-tools:v0.5.0"
 const dindImg = "docker:20.10.9-dind"
 const dockerClientImg = "brigadecore/docker-tools:v0.1.0"
@@ -16,12 +14,6 @@ class MakeTargetJob extends Job {
     this.primaryContainer.workingDirectory = localPath
     this.primaryContainer.environment = env || {}
     this.primaryContainer.environment["SKIP_DOCKER"] = "true"
-    if (event.worker?.git?.ref) {
-      const matchStr = event.worker.git.ref.match(releaseTagRegex)
-      if (matchStr) {
-        this.primaryContainer.environment["VERSION"] = Array.from(matchStr)[1] as string
-      }
-    }
     this.primaryContainer.command = [ "make" ]
     this.primaryContainer.arguments = targets
   }
@@ -86,18 +78,22 @@ class BuildImageJob extends MakeTargetJob {
 
 // PushImageJob is a specialized job type for publishing Docker images.
 class PushImageJob extends BuildImageJob {
-  constructor(target: string, event: Event) {
-    super(target, event, {
+  constructor(target: string, event: Event, version?: string) {
+    const env = {
       "DOCKER_ORG": event.project.secrets.dockerhubOrg,
       "DOCKER_USERNAME": event.project.secrets.dockerhubUsername,
       "DOCKER_PASSWORD": event.project.secrets.dockerhubPassword
-    })
+    }
+    if (version) {
+      env["VERSION"] = version
+    }
+    super(target, event, env)
   }
 }
 
 // A map of all jobs. When a check_run:rerequested event wants to re-run a
 // single job, this allows us to easily find that job by name.
-const jobs: {[key: string]: (event: Event) => Job } = {}
+const jobs: {[key: string]: (event: Event, version?: string) => Job } = {}
 
 // Basic tests:
 
@@ -130,14 +126,15 @@ const buildJob = (event: Event) => {
 jobs[buildJobName] = buildJob
 
 const pushJobName = "push"
-const pushJob = (event: Event) => {
-  return new PushImageJob(pushJobName, event)
+const pushJob = (event: Event, version?: string) => {
+  return new PushImageJob(pushJobName, event, version)
 }
 jobs[pushJobName] = pushJob
 
 const publishChartJobName = "publish-chart"
-const publishChartJob = (event: Event) => {
+const publishChartJob = (event: Event, version: string) => {
   return new MakeTargetJob([publishChartJobName], helmImg, event, {
+    "VERSION": version,
     "HELM_REGISTRY": event.project.secrets.helmRegistry || "ghcr.io",
     "HELM_ORG": event.project.secrets.helmOrg,
     "HELM_USERNAME": event.project.secrets.helmUsername,
@@ -188,22 +185,12 @@ events.on("brigade.sh/github", "check_run:rerequested", async event => {
   throw new Error(`No job found with name: ${jobName}`)
 })
 
-// Pushing new commits to any branch in github triggers a check suite. Such
-// events are already handled above. Here we're only concerned with the case
-// wherein a new TAG has been pushed-- and even then, we're only concerned with
-// tags that look like a semantic version and indicate a formal release should
-// be performed.
-events.on("brigade.sh/github", "push", async event => {
-  const matchStr = event.worker.git.ref.match(releaseTagRegex)
-  if (matchStr) {
-    // This is an official release with a semantically versioned tag
-    await new SerialGroup(
-      pushJob(event),
-      publishChartJob(event)
-    ).run()
-  } else {
-    console.log(`Ref ${event.worker.git.ref} does not match release tag regex (${releaseTagRegex}); not releasing.`)
-  }
+events.on("brigade.sh/github", "release:published", async event => {
+  const version = JSON.parse(event.payload).release.tag_name
+  await new SerialGroup(
+    pushJob(event, version),
+    publishChartJob(event, version)
+  ).run()
 })
 
 events.process()
