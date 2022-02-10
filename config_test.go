@@ -6,7 +6,7 @@ import (
 
 	"github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents"
 	"github.com/brigadecore/brigade-foundations/http"
-	"github.com/brigadecore/brigade/sdk/v2/restmachinery"
+	"github.com/brigadecore/brigade/sdk/v3/restmachinery"
 	"github.com/stretchr/testify/require"
 )
 

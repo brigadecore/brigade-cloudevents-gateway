@@ -3,7 +3,7 @@ package cloudevents
 import (
 	"context"
 
-	"github.com/brigadecore/brigade/sdk/v2/core"
+	"github.com/brigadecore/brigade/sdk/v3"
 	cloudEvents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 )
@@ -21,19 +21,19 @@ type Service interface {
 }
 
 type service struct {
-	eventsClient core.EventsClient
+	eventsClient sdk.EventsClient
 }
 
 // NewService returns an implementation of the Service interface for handling
 // CloudEvents.
-func NewService(eventsClient core.EventsClient) Service {
+func NewService(eventsClient sdk.EventsClient) Service {
 	return &service{
 		eventsClient: eventsClient,
 	}
 }
 
 func (s *service) Handle(ctx context.Context, event cloudEvents.Event) error {
-	brigadeEvent := core.Event{
+	brigadeEvent := sdk.Event{
 		Source: eventSource,
 		Type:   eventType,
 		Qualifiers: map[string]string{
@@ -42,6 +42,6 @@ func (s *service) Handle(ctx context.Context, event cloudEvents.Event) error {
 		},
 		Payload: string(event.Data()),
 	}
-	_, err := s.eventsClient.Create(ctx, brigadeEvent)
+	_, err := s.eventsClient.Create(ctx, brigadeEvent, nil)
 	return errors.Wrap(err, "error creating brigade event from cloud event")
 }
