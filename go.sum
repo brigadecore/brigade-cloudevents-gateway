@@ -1,7 +1,7 @@
 github.com/brigadecore/brigade-foundations v0.3.0 h1:galsMzxSprURAEc2pxsmYJandiW4D+Npchx6ZiBIHkY=
 github.com/brigadecore/brigade-foundations v0.3.0/go.mod h1:edMgSJCUgfHN1RNGiiVOTRW4X4VykBLgssgWHPZK7Sg=
-github.com/brigadecore/brigade/sdk/v2 v2.0.0 h1:RpApjVcSvuwuN5Sdjm4Vw9H5JWaxl/vZA6f3xC+cPp4=
-github.com/brigadecore/brigade/sdk/v2 v2.0.0/go.mod h1:rB3y/pIheORX5AHbxaSAw5Xr/U6bUAUtSLkgJcbOHIY=
+github.com/brigadecore/brigade/sdk/v3 v3.0.0 h1:jCjKQuoDYK8J+P2Zpuc/IQK/GKx0M678AbD0GgxOvcM=
+github.com/brigadecore/brigade/sdk/v3 v3.0.0/go.mod h1:Ow91x3wvUtkyMsV6hwbPtVZevrcHqoH0Pjh0OID4Sh0=
 github.com/cloudevents/sdk-go/v2 v2.4.1 h1:rZJoz9QVLbWQmnvLPDFEmv17Czu+CfSPwMO6lhJ72xQ=
 github.com/cloudevents/sdk-go/v2 v2.4.1/go.mod h1:MZiMwmAh5tGj+fPFvtHv9hKurKqXtdB9haJYMJ/7GJY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

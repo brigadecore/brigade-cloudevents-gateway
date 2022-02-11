@@ -8,7 +8,7 @@ import (
 	libHTTP "github.com/brigadecore/brigade-foundations/http"
 	"github.com/brigadecore/brigade-foundations/signals"
 	"github.com/brigadecore/brigade-foundations/version"
-	"github.com/brigadecore/brigade/sdk/v2/core"
+	"github.com/brigadecore/brigade/sdk/v3"
 	"github.com/cloudevents/sdk-go/v2/client"
 	cloudHTTP "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"github.com/gorilla/mux"
@@ -31,7 +31,7 @@ func main() {
 			log.Fatal(err)
 		}
 		cloudEventsService = cloudevents.NewService(
-			core.NewEventsClient(address, token, &opts),
+			sdk.NewEventsClient(address, token, &opts),
 		)
 	}
 
