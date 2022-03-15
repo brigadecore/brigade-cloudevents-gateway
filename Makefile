@@ -117,7 +117,6 @@ upload-code-coverage:
 
 .PHONY: build
 build:
-	docker login $(DOCKER_REGISTRY) -u $(DOCKER_USERNAME) -p $${DOCKER_PASSWORD}
 	docker buildx build \
 		-t $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
 		-t $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG) \
@@ -135,7 +134,6 @@ publish: push publish-chart
 
 .PHONY: push
 push:
-	docker login $(DOCKER_REGISTRY) -u $(DOCKER_USERNAME) -p $${DOCKER_PASSWORD}
 	docker buildx build \
 		-t $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
 		-t $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG) \
