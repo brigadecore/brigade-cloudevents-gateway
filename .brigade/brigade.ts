@@ -2,7 +2,7 @@ import { events, Event, Job, ConcurrentGroup, SerialGroup, Container } from "@br
 
 const goImg = "brigadecore/go-tools:v0.6.0"
 const dindImg = "docker:20.10.9-dind"
-const dockerClientImg = "brigadecore/docker-tools:v0.1.0"
+const dockerClientImg = "brigadecore/docker-tools:v0.2.0"
 const helmImg = "brigadecore/helm-tools:v0.4.0"
 const localPath = "/workspaces/brigade-cloudevents-gateway"
 
@@ -156,6 +156,22 @@ const buildJob = (event: Event, version?: string) => {
 }
 jobs[buildJobName] = buildJob
 
+const scanJobName = "scan"
+const scanJob = (event: Event) => {
+  const env = {}
+  const secrets = event.project.secrets
+  if (secrets.unstableImageRegistry) {
+    env["DOCKER_REGISTRY"] = secrets.unstableImageRegistry
+  }
+  if (secrets.unstableImageRegistryOrg) {
+    env["DOCKER_ORG"] = secrets.unstableImageRegistryOrg
+  }
+  const job = new MakeTargetJob(scanJobName, ["scan"], dockerClientImg, event, env)
+  job.fallible = true
+  return job
+}
+jobs[scanJobName] = scanJob
+
 const publishChartJobName = "publish-chart"
 const publishChartJob = (event: Event, version: string) => {
   return new MakeTargetJob(publishChartJobName, ["publish-chart"], helmImg, event, {
@@ -174,7 +190,8 @@ events.on("brigade.sh/github", "ci:pipeline_requested", async event => {
       lintJob(event),
       lintChartJob(event)
     ),
-    buildJob(event)
+    buildJob(event),
+    scanJob(event)
   ).run()
 })
 
