@@ -1,6 +1,6 @@
 {
   "name": "brigade-cloudevents-gateway-ci-cd",
   "dependencies": {
-    "@brigadecore/brigadier": "^2.1.0"
+    "@brigadecore/brigadier": "^2.3.1"
   }
 }
