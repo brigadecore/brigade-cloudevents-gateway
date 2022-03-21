@@ -1,6 +1,6 @@
 module github.com/brigadecore/brigade-cloudevents-gateway
 
-go 1.17
+go 1.18
 
 require (
 	github.com/brigadecore/brigade-foundations v0.3.0
