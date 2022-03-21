@@ -2,7 +2,7 @@ import { events, Event, Job, ConcurrentGroup, SerialGroup, Container } from "@br
 
 const goImg = "brigadecore/go-tools:v0.6.0"
 const dindImg = "docker:20.10.9-dind"
-const dockerClientImg = "brigadecore/docker-tools:v0.2.0"
+const dockerClientImg = "brigadecore/docker-tools:v0.3.0"
 const helmImg = "brigadecore/helm-tools:v0.4.0"
 const localPath = "/workspaces/brigade-cloudevents-gateway"
 
@@ -29,7 +29,7 @@ class MakeTargetJob extends JobWithSource {
 
 // A map of all jobs. When a ci:job_requested event wants to re-run a single
 // job, this allows us to easily find that job by name.
-const jobs: {[key: string]: (event: Event) => Job } = {}
+const jobs: {[key: string]: (event: Event, version?: string) => Job } = {}
 
 // Basic tests:
 
@@ -172,6 +172,25 @@ const scanJob = (event: Event) => {
 }
 jobs[scanJobName] = scanJob
 
+const publishSBOMJobName = "publish-sbom"
+const publishSBOMJob = (event: Event, version: string) => {
+  const secrets = event.project.secrets
+  const env = {
+    "GITHUB_ORG": secrets.githubOrg,
+    "GITHUB_REPO": secrets.githubRepo,
+    "GITHUB_TOKEN": secrets.githubToken,
+    "VERSION": version
+  }
+  if (secrets.stableImageRegistry) {
+    env["DOCKER_REGISTRY"] = secrets.stableImageRegistry
+  }
+  if (secrets.stableImageRegistryOrg) {
+    env["DOCKER_ORG"] = secrets.stableImageRegistryOrg
+  }
+  return new MakeTargetJob(publishSBOMJobName, ["publish-sbom"], dockerClientImg, event, env)
+}
+jobs[publishSBOMJobName] = publishSBOMJob
+
 const publishChartJobName = "publish-chart"
 const publishChartJob = (event: Event, version: string) => {
   return new MakeTargetJob(publishChartJobName, ["publish-chart"], helmImg, event, {
@@ -209,7 +228,8 @@ events.on("brigade.sh/github", "cd:pipeline_requested", async event => {
   const version = JSON.parse(event.payload).release.tag_name
   await new SerialGroup(
     buildJob(event, version),
-    publishChartJob(event, version)
+    publishChartJob(event, version),
+    publishSBOMJob(event, version)
   ).run()
 })
 
