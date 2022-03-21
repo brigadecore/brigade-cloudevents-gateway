@@ -11,8 +11,9 @@ import (
 )
 
 func TestNewTokenFilterConfig(t *testing.T) {
-	config := NewTokenFilterConfig()
-	require.NotNil(t, config.(*tokenFilterConfig).hashedTokensBySource)
+	config, ok := NewTokenFilterConfig().(*tokenFilterConfig)
+	require.True(t, ok)
+	require.NotNil(t, config.hashedTokensBySource)
 }
 
 func TestAddToken(t *testing.T) {
