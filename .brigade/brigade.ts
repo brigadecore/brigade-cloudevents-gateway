@@ -1,6 +1,6 @@
 import { events, Event, Job, ConcurrentGroup, SerialGroup, Container } from "@brigadecore/brigadier"
 
-const goImg = "brigadecore/go-tools:v0.6.0"
+const goImg = "brigadecore/go-tools:v0.8.0"
 const dindImg = "docker:20.10.9-dind"
 const dockerClientImg = "brigadecore/docker-tools:v0.2.0"
 const helmImg = "brigadecore/helm-tools:v0.4.0"
