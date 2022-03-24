@@ -105,6 +105,8 @@ const buildJob = (event: Event, version?: string) => {
   let registryOrg: string
   let registryUsername: string
   let registryPassword: string
+  let signingSetupCommands = ""
+  let signingCommand = ""
   if (!version) { // This is where we'll push potentially unstable images
     registry = secrets.unstableImageRegistry
     registryOrg = secrets.unstableImageRegistryOrg
@@ -117,6 +119,16 @@ const buildJob = (event: Event, version?: string) => {
     registryPassword = secrets.stableImageRegistryPassword
     // Since it's defined, the make target will want this env var
     env["VERSION"] = version
+    env["BASE64_IMAGE_SIGNING_KEY"] = secrets.base64ImageSigningKey
+    // This env var is documented here:
+    // https://docs.docker.com/engine/security/trust/trust_automation/
+    env["DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE"] = secrets.imageSigningKeyPassphrase
+    const keyDir = "~/.docker/trust/private"
+    const keyFile = `${keyDir}/${secrets.imageSigningKeyHash}.key`
+    signingSetupCommands = `mkdir -p ${keyDir} && chmod 700 ${keyDir} && ` +
+      `printf $BASE64_IMAGE_SIGNING_KEY | base64 -d > ${keyFile} && chmod 600 ${keyFile} && ` +
+      `docker trust key load --name ${registryUsername} ${keyFile} && `
+    signingCommand = " && make sign"
   }
   if (registry) {
     // Since it's defined, the make target will want this env var
@@ -137,7 +149,7 @@ const buildJob = (event: Event, version?: string) => {
     env["IMAGE_REGISTRY_PASSWORD"] = registryPassword
     registriesLoginCmd = `${registriesLoginCmd} && docker login ${registry} -u ${registryUsername} -p $IMAGE_REGISTRY_PASSWORD`
   }
-  const job = new JobWithSource("build", dockerClientImg, event, env)
+  const job = new JobWithSource(buildJobName, dockerClientImg, event, env)
   job.primaryContainer.command = [ "sh" ]
   job.primaryContainer.arguments = [
     "-c",
@@ -145,9 +157,11 @@ const buildJob = (event: Event, version?: string) => {
     // probably up and running.
     "sleep 20 && " +
       `${registriesLoginCmd} && ` +
+      signingSetupCommands +
       "docker buildx create --name builder --use && " +
       "docker info && " +
-      "make push"
+      "make push" +
+      signingCommand
   ]
   job.sidecarContainers.dind = new Container(dindImg)
   job.sidecarContainers.dind.privileged = true
