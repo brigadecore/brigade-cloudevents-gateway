@@ -2,7 +2,7 @@ import { events, Event, Job, ConcurrentGroup, SerialGroup, Container } from "@br
 
 const goImg = "brigadecore/go-tools:v0.8.0"
 const dindImg = "docker:20.10.9-dind"
-const dockerClientImg = "brigadecore/docker-tools:v0.3.0"
+const dockerClientImg = "brigadecore/docker-tools:v0.4.0"
 const helmImg = "brigadecore/helm-tools:v0.4.0"
 const localPath = "/workspaces/brigade-cloudevents-gateway"
 
