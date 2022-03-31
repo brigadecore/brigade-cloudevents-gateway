@@ -87,7 +87,7 @@ a file you can modify:
 
 ```console
 $ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
-    --version v0.4.0 > ~/brigade-cloudevents-gateway-values.yaml
+    --version v0.4.1 > ~/brigade-cloudevents-gateway-values.yaml
 ```
 
 Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
@@ -123,7 +123,7 @@ the gateway using the above customizations:
 ```console
 $ helm install brigade-cloudevents-gateway \
     oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
-    --version v0.4.0 \
+    --version v0.4.1 \
     --create-namespace \
     --namespace brigade-cloudevents-gateway \
     --values ~/brigade-cloudevents-gateway-values.yaml \
