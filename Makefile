@@ -1,6 +1,6 @@
 SHELL ?= /bin/bash
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := push
 
 ################################################################################
 # Version details                                                              #
@@ -112,20 +112,6 @@ upload-code-coverage:
 	$(GO_DOCKER_CMD) codecov
 
 ################################################################################
-# Build                                                                        #
-################################################################################
-
-.PHONY: build
-build:
-	docker buildx build \
-		-t $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
-		-t $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG) \
-		--build-arg VERSION=$(VERSION) \
-		--build-arg COMMIT=$(GIT_VERSION) \
-		--platform linux/amd64,linux/arm64 \
-		.
-
-################################################################################
 # Image security                                                               #
 ################################################################################
 
@@ -185,49 +171,3 @@ publish-chart:
 		helm package . --version $(VERSION) --app-version $(VERSION) && \
 		helm push brigade-cloudevents-gateway-$(VERSION).tgz oci://$(HELM_REGISTRY)$(HELM_ORG) \
 	'
-
-################################################################################
-# Targets to facilitate hacking on Brigade CloudEvents Gateway.                  #
-################################################################################
-
-.PHONY: hack-build
-hack-build:
-	docker build \
-		-t $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
-		-t $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG) \
-		--build-arg VERSION='$(VERSION)' \
-		--build-arg COMMIT='$(GIT_VERSION)' \
-		.
-
-.PHONY: hack-push
-hack-push: hack-build
-	docker push $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG)
-	docker push $(DOCKER_IMAGE_NAME):$(MUTABLE_DOCKER_TAG)
-
-IMAGE_PULL_POLICY ?= Always
-
-.PHONY: hack-deploy
-hack-deploy:
-ifndef BRIGADE_API_TOKEN
-	@echo "BRIGADE_API_TOKEN must be defined" && false
-endif
-	helm dep up charts/brigade-cloudevents-gateway && \
-	helm upgrade brigade-cloudevents-gateway charts/brigade-cloudevents-gateway \
-		--install \
-		--create-namespace \
-		--namespace brigade-cloudevents-gateway \
-		--timeout 60s \
-		--set image.repository=$(DOCKER_IMAGE_NAME) \
-		--set image.tag=$(IMMUTABLE_DOCKER_TAG) \
-		--set image.pullPolicy=$(IMAGE_PULL_POLICY) \
-		--set brigade.apiToken=$(BRIGADE_API_TOKEN)
-
-.PHONY: hack
-hack: hack-push hack-deploy
-
-# Convenience target for loading image into a KinD cluster
-.PHONY: hack-load-image
-hack-load-image:
-	@echo "Loading $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG)"
-	@kind load docker-image $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG) \
-			|| echo >&2 "kind not installed or error loading image: $(DOCKER_IMAGE_NAME):$(IMMUTABLE_DOCKER_TAG)"
