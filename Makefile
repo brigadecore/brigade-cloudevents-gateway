@@ -171,3 +171,23 @@ publish-chart:
 		helm package . --version $(VERSION) --app-version $(VERSION) && \
 		helm push brigade-cloudevents-gateway-$(VERSION).tgz oci://$(HELM_REGISTRY)$(HELM_ORG) \
 	'
+
+################################################################################
+# Targets to facilitate hacking on this gateway                                #
+################################################################################
+
+.PHONY: hack-kind-up
+hack-kind-up:
+	ctlptl apply -f hack/kind/cluster.yaml
+	HELM_EXPERIMENTAL_OCI=1 helm upgrade brigade \
+		oci://ghcr.io/brigadecore/brigade \
+		--version v2.3.1 \
+		--install \
+		--create-namespace \
+		--namespace brigade \
+		--wait \
+		--timeout 300s
+
+.PHONY: hack-kind-down
+hack-kind-down:
+	ctlptl delete -f hack/kind/cluster.yaml

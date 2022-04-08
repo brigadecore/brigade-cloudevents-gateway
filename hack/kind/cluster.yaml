@@ -1,0 +1,5 @@
+apiVersion: ctlptl.dev/v1alpha1
+kind: Cluster
+name: kind-brigade-cloudevents-gateway-dev-cluster
+product: kind
+registry: brigade-dev-registry
