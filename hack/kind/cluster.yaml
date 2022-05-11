@@ -3,3 +3,8 @@ kind: Cluster
 name: kind-brigade-cloudevents-gateway-dev-cluster
 product: kind
 registry: brigade-dev-registry
+kindV1Alpha4Cluster:
+  nodes:
+  - extraPortMappings:
+    - containerPort: 31600
+      hostPort: 31600
