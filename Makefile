@@ -181,10 +181,13 @@ hack-kind-up:
 	ctlptl apply -f hack/kind/cluster.yaml
 	HELM_EXPERIMENTAL_OCI=1 helm upgrade brigade \
 		oci://ghcr.io/brigadecore/brigade \
-		--version v2.3.1 \
+		--version v2.4.0 \
 		--install \
 		--create-namespace \
 		--namespace brigade \
+		--set apiserver.rootUser.password='F00Bar!!!' \
+		--set apiserver.service.type=NodePort \
+		--set apiserver.service.nodePort=31600 \
 		--wait \
 		--timeout 300s
 
