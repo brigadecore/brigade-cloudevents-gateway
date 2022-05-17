@@ -39,7 +39,7 @@ Please refer to Brigade's own documentation.
 
 Using Brigade 2's `brig` CLI, create a service account for the gateway to use:
 
-```console
+```shell
 $ brig service-account create \
     --id brigade-cloudevents-gateway \
     --description brigade-cloudevents-gateway
@@ -50,7 +50,7 @@ _It is your only opportunity to access this value, as Brigade does not save it._
 
 Authorize this service account to create new events:
 
-```console
+```shell
 $ brig role grant EVENT_CREATOR \
     --service-account brigade-cloudevents-gateway \
     --source brigade.sh/cloudevents
@@ -75,7 +75,7 @@ First, be sure you are using
 [Helm 3.7.0](https://github.com/helm/helm/releases/tag/v3.7.0) or greater and
 enable experimental OCI support:
 
-```console
+```shell
 $ export HELM_EXPERIMENTAL_OCI=1
 ```
 
@@ -85,7 +85,7 @@ properly, we'll need to create a chart values file with said config.
 Use the following command to extract the full set of configuration options into
 a file you can modify:
 
-```console
+```shell
 $ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
     --version v0.4.1 > ~/brigade-cloudevents-gateway-values.yaml
 ```
@@ -120,7 +120,7 @@ Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
 Save your changes to `~/brigade-cloudevents-gateway-values.yaml` and use the following command to install
 the gateway using the above customizations:
 
-```console
+```shell
 $ helm install brigade-cloudevents-gateway \
     oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
     --version v0.4.1 \
@@ -136,7 +136,7 @@ $ helm install brigade-cloudevents-gateway \
 If you overrode defaults and set `service.type` to `LoadBalancer`, use this
 command to find the gateway's public IP address:
 
-```console
+```shell
 $ kubectl get svc brigade-cloudevents-gateway \
     --namespace brigade-cloudevents-gateway \
     --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
@@ -184,7 +184,7 @@ spec:
 Assuming this file were named `project.yaml`, you can create the project like
 so:
 
-```console
+```shell
 $ brig project create --file project.yaml
 ```
 
@@ -193,7 +193,7 @@ $ brig project create --file project.yaml
 You can use the following `curl` command to send a CloudEvent that should be
 subscribed to by the example project in the previous section:
 
-```console
+```shell
 $ curl -i -k -X POST \
     -H "ce-specversion: 1.0" \
     -H "ce-id: 1234-1234-1234" \
@@ -205,7 +205,7 @@ $ curl -i -k -X POST \
 
 If the gateway accepts the request, output will look like this:
 
-```console
+```shell
 HTTP/1.1 200 OK
 Date: Tue, 03 Aug 2021 19:13:37 GMT
 Content-Length: 0
@@ -215,7 +215,7 @@ To confirm that the gateway emitted a corresponding Brigade event into Brigade's
 event bus, list the events for the `cloudevents-demo` project (created in
 section 4), which is subscribed to such events:
 
-```console
+```shell
 $ brig event list --project cloudevents-demo
 ```
 
