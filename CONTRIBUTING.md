@@ -113,8 +113,8 @@ of this:
    the applicable ngrok URL will be displayed in the gateway's logs in the Tilt
    UI.
 
-1. Use the ngrok URL from the previous step and token(s) (shared secrets) from
-   the [Running `tilt up` section](#running-tilt-up) when configuring external
+1. Use the URL `<ngrok URL>/events` and token(s) (shared secrets) from the
+   [Running `tilt up` section](#running-tilt-up) when configuring external
    services to deliver cloudevents to your gateway.
 
 > ⚠️&nbsp;&nbsp;We cannot guarantee that ngrok will work in all environments,
