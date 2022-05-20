@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents"
+	ourCloudHTTP "github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents/http" // nolint: lll
 	"github.com/brigadecore/brigade-foundations/file"
 	"github.com/brigadecore/brigade-foundations/http"
 	"github.com/brigadecore/brigade-foundations/os"
@@ -30,30 +30,31 @@ func apiClientConfig() (string, string, restmachinery.APIClientOptions, error) {
 	return address, token, opts, err
 }
 
-func tokenFilterConfig() (cloudevents.TokenFilterConfig, error) {
-	config := cloudevents.NewTokenFilterConfig()
-	sourceTokensPath, err := os.GetRequiredEnvVar("SOURCE_TOKENS_PATH")
+// tokenFilterConfig populates config for the token filter.
+func tokenFilterConfig() (ourCloudHTTP.TokenFilterConfig, error) {
+	config := ourCloudHTTP.NewTokenFilterConfig()
+	tokensPath, err := os.GetRequiredEnvVar("TOKENS_PATH")
 	if err != nil {
 		return config, err
 	}
 	var exists bool
-	if exists, err = file.Exists(sourceTokensPath); err != nil {
+	if exists, err = file.Exists(tokensPath); err != nil {
 		return config, err
 	}
 	if !exists {
-		return config, errors.Errorf("file %s does not exist", sourceTokensPath)
+		return config, errors.Errorf("file %s does not exist", tokensPath)
 	}
-	sourceTokenBytes, err := ioutil.ReadFile(sourceTokensPath)
+	tokenBytes, err := ioutil.ReadFile(tokensPath)
 	if err != nil {
 		return config, err
 	}
-	plainTextSourceTokens := map[string]string{}
+	plainTextTokens := map[string]string{}
 	if err :=
-		json.Unmarshal(sourceTokenBytes, &plainTextSourceTokens); err != nil {
+		json.Unmarshal(tokenBytes, &plainTextTokens); err != nil {
 		return config, err
 	}
-	for source, token := range plainTextSourceTokens {
-		config.AddToken(source, token)
+	for _, token := range plainTextTokens {
+		config.AddToken(token)
 	}
 	return config, nil
 }
