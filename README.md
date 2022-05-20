@@ -104,18 +104,10 @@ Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following changes:
   as its default -- `ClusterIP`. If you do not plan to enable ingress, you
   probably will want to change this value to `LoadBalancer`.
 
-* `tokens`: This field should map CloudEvent sources to tokens (shared secrets)
-  that can be used by clients to send cloud events for each source.
-  
-  Note that a Brigade event's source/type fields and a CloudEvent's source/type
-  fields are similar in that they are both metadata that enable event routing,
-  but will be different in value. The CloudEvent Gateway emits _Brigade_ events
-  into Brigade's event bus with the source `brigade.sh/cloudevents` and type
-  `cloudevent`. The CloudEvent's _original_ source and type become _qualifiers_
-  on the Brigade event.
-
-  For the example in sections 4 and 5 below, edit the token so that source
-  `example/uri` authenticates using the token (shared secret) `MySharedSecret`.
+* `tokens`: This field should define tokens that can be used by clients to send
+  events (webhooks) to this gateway. Note that keys are completely ignored by
+  the gateway and only the values (tokens) matter. The keys only serve as
+  recognizable token identifiers for human operators.
 
 Save your changes to `~/brigade-cloudevents-gateway-values.yaml` and use the following command to install
 the gateway using the above customizations:
@@ -199,9 +191,17 @@ $ curl -i -k -X POST \
     -H "ce-id: 1234-1234-1234" \
     -H "ce-source: example/uri" \
     -H "ce-type: example.type" \
-    -H "Authorization: Bearer MySharedSecret" \
+    -H "Authorization: Bearer <a token from ~/brigade-cloudevents-gateway-values.yaml>" \
     https://<public IP or host name here>/events
 ```
+
+> ⚠️&nbsp;&nbsp;Note that the CloudEvent we simulated above utilizes
+> [binary content mode](~/brigade-cloudevents-gateway-values.yaml). In this
+> mode, all the CloudEvent metadata is included in HTTP request headers, making
+> this the most convenient sort of CloudEvent to simulate using `curl` as a
+> client. The gateway _also_ supports the more common
+> [structured content mode](https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md#32-structured-content-mode)
+> wherein CloudEvent metadata is found within the payload itself.
 
 If the gateway accepts the request, output will look like this:
 
@@ -218,6 +218,9 @@ section 4), which is subscribed to such events:
 ```shell
 $ brig event list --project cloudevents-demo
 ```
+
+If this all works out, you should be equally successful wiring CloudEvents from
+any CloudEvents 1.0-compliant provider into your Brigade instance.
 
 Full coverage of `brig` commands is beyond the scope of this documentation, but
 at this point, additional `brig` commands can be applied to monitor the event's
