@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/brigadecore/brigade-foundations v0.3.0
 	github.com/brigadecore/brigade/sdk/v3 v3.0.0
-	github.com/cloudevents/sdk-go/v2 v2.4.1
+	github.com/cloudevents/sdk-go/v2 v2.10.0
 	github.com/gorilla/mux v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

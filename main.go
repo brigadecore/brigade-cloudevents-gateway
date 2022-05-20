@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents"
+	ourCloudHTTP "github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents/http" // nolint: lll
 	libHTTP "github.com/brigadecore/brigade-foundations/http"
 	"github.com/brigadecore/brigade-foundations/signals"
 	"github.com/brigadecore/brigade-foundations/version"
@@ -65,6 +66,10 @@ func main() {
 			"/events",
 			tokenFilter.Decorate(cloudEventsHandler.ServeHTTP),
 		).Methods(http.MethodPost)
+		router.HandleFunc(
+			"/events",
+			ourCloudHTTP.ValidateEventSource, // No auth filter for OPTIONS requests
+		).Methods(http.MethodOptions)
 		router.HandleFunc("/healthz", libHTTP.Healthz).Methods(http.MethodGet)
 		serverConfig, err := serverConfig()
 		if err != nil {
