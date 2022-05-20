@@ -126,8 +126,10 @@ brigade:
   ## Whether to ignore cert warning from the API server
   apiIgnoreCertWarnings: true
 
-## The tokens field maps CloudEvent sources to corresponding tokens (shared
-## secrets) that clients must use to authenticate when submitting CloudEvents.
+## The tokens field defines tokens (shared secrets) that may be used for
+## authenticating to this gateway. The keys are completely ignored by the
+## gateway and only the values (tokens) matter. The keys only serve as
+## recognizable token identifiers for human operators.
 tokens: {}
   ## Example:
   # example/uri: MySharedSecret

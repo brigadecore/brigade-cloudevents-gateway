@@ -83,8 +83,8 @@ spec:
               key: brigadeAPIToken
         - name: API_IGNORE_CERT_WARNINGS
           value: {{ quote .Values.brigade.apiIgnoreCertWarnings }}
-        - name: SOURCE_TOKENS_PATH
-          value: /app/config/source-tokens.json
+        - name: TOKENS_PATH
+          value: /app/config/tokens.json
         volumeMounts:
         - name: config
           mountPath: /app/config
