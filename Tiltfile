@@ -51,7 +51,8 @@ k8s_yaml(
     namespace = 'brigade-cloudevents-gateway',
     set = [
       'brigade.apiToken=' + os.environ['BRIGADE_API_TOKEN'],
-      'tls.enabled=false'
+      'tls.enabled=false',
+      'tokens.dev-token=insecure-dev-token'
     ]
   )
 )
