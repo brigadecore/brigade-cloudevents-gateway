@@ -58,7 +58,7 @@ func NewTokenFilter(config TokenFilterConfig) libHTTP.Filter {
 
 func (t *tokenFilter) Decorate(handle http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Find the access token provided by the client.
+		// Look for a token in the Authorization header first
 		var providedToken string
 		if headerValue := r.Header.Get("Authorization"); headerValue != "" {
 			if headerValueParts := strings.SplitN(
@@ -68,6 +68,10 @@ func (t *tokenFilter) Decorate(handle http.HandlerFunc) http.HandlerFunc {
 			); len(headerValueParts) == 2 && headerValueParts[0] == "Bearer" {
 				providedToken = headerValueParts[1]
 			}
+		}
+		// Then try the access_token query param
+		if providedToken == "" {
+			providedToken = r.URL.Query().Get("access_token")
 		}
 		// If no token was provided, then access is denied
 		if providedToken == "" {

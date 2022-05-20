@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/brigadecore/brigade-foundations/crypto"
@@ -52,7 +53,7 @@ func TestTokenFilter(t *testing.T) {
 		assertions func(handlerCalled bool, r *http.Response)
 	}{
 		{
-			name: "valid token provided",
+			name: "valid token provided in Authorization header",
 			filter: &tokenFilter{
 				config: testConfig,
 			},
@@ -60,6 +61,24 @@ func TestTokenFilter(t *testing.T) {
 				req, err := http.NewRequest(http.MethodPost, "/", nil)
 				require.NoError(t, err)
 				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", testToken))
+				return req
+			},
+			assertions: func(handlerCalled bool, r *http.Response) {
+				require.Equal(t, http.StatusOK, r.StatusCode)
+				require.True(t, handlerCalled)
+			},
+		},
+		{
+			name: "valid token provided as query parameter",
+			filter: &tokenFilter{
+				config: testConfig,
+			},
+			setup: func() *http.Request {
+				req, err := http.NewRequest(http.MethodPost, "/", nil)
+				require.NoError(t, err)
+				q := url.Values{}
+				q.Set("access_token", testToken)
+				req.URL.RawQuery = q.Encode()
 				return req
 			},
 			assertions: func(handlerCalled bool, r *http.Response) {
