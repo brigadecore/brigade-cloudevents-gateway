@@ -2,6 +2,7 @@ package cloudevents
 
 import (
 	"context"
+	"log"
 
 	"github.com/brigadecore/brigade/sdk/v3"
 	cloudEvents "github.com/cloudevents/sdk-go/v2"
@@ -43,5 +44,11 @@ func (s *service) Handle(ctx context.Context, event cloudEvents.Event) error {
 		Payload: string(event.Data()),
 	}
 	_, err := s.eventsClient.Create(ctx, brigadeEvent, nil)
-	return errors.Wrap(err, "error creating brigade event from cloud event")
+	if err != nil {
+		err = errors.Wrap(err, "error creating brigade event from cloud event")
+		// Nothing in cloudevents/sdk-go's HTTP protocol bindings seems to log the
+		// error we return, so we log it ourselves here.
+		log.Println(err)
+	}
+	return err
 }
