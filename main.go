@@ -37,7 +37,14 @@ func main() {
 
 	var cloudEventsHandler *client.EventReceiver
 	{
-		proto, err := cloudHTTP.New()
+		proto, err := cloudHTTP.New(
+			cloudHTTP.WithDefaultOptionsHandlerFunc(
+				[]string{http.MethodPost},
+				cloudHTTP.DefaultAllowedRate,
+				[]string{"*"},
+				true,
+			),
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,6 +72,10 @@ func main() {
 			"/events",
 			tokenFilter.Decorate(cloudEventsHandler.ServeHTTP),
 		).Methods(http.MethodPost)
+		router.HandleFunc(
+			"/events",
+			cloudEventsHandler.ServeHTTP, // No auth filter for OPTIONS requests
+		).Methods(http.MethodOptions)
 		router.HandleFunc("/healthz", libHTTP.Healthz).Methods(http.MethodGet)
 		serverConfig, err := serverConfig()
 		if err != nil {
