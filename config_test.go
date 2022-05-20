@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents"
+	ourCloudHTTP "github.com/brigadecore/brigade-cloudevents-gateway/internal/cloudevents/http" // nolint: lll
 	"github.com/brigadecore/brigade-foundations/http"
 	"github.com/brigadecore/brigade/sdk/v3/restmachinery"
 	"github.com/stretchr/testify/require"
@@ -88,22 +88,22 @@ func TestTokenFilterConfig(t *testing.T) {
 	testCases := []struct {
 		name       string
 		setup      func()
-		assertions func(cloudevents.TokenFilterConfig, error)
+		assertions func(ourCloudHTTP.TokenFilterConfig, error)
 	}{
 		{
-			name: "SOURCE_TOKENS_PATH not set",
-			assertions: func(_ cloudevents.TokenFilterConfig, err error) {
+			name: "TOKENS_PATH not set",
+			assertions: func(_ ourCloudHTTP.TokenFilterConfig, err error) {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), "value not found for")
-				require.Contains(t, err.Error(), "SOURCE_TOKENS_PATH")
+				require.Contains(t, err.Error(), "TOKENS_PATH")
 			},
 		},
 		{
-			name: "SOURCE_TOKENS_PATH path does not exist",
+			name: "TOKENS_PATH path does not exist",
 			setup: func() {
-				t.Setenv("SOURCE_TOKENS_PATH", "/completely/bogus/path")
+				t.Setenv("TOKENS_PATH", "/completely/bogus/path")
 			},
-			assertions: func(_ cloudevents.TokenFilterConfig, err error) {
+			assertions: func(_ ourCloudHTTP.TokenFilterConfig, err error) {
 				require.Error(t, err)
 				require.Contains(
 					t,
@@ -113,16 +113,16 @@ func TestTokenFilterConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "SOURCE_TOKENS_PATH does not contain valid json",
+			name: "TOKENS_PATH does not contain valid json",
 			setup: func() {
-				tokensFile, err := ioutil.TempFile("", "tls-*.key")
+				tokensFile, err := ioutil.TempFile("", "tokens.json")
 				require.NoError(t, err)
 				defer tokensFile.Close()
 				_, err = tokensFile.Write([]byte("this is not json"))
 				require.NoError(t, err)
-				t.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
+				t.Setenv("TOKENS_PATH", tokensFile.Name())
 			},
-			assertions: func(_ cloudevents.TokenFilterConfig, err error) {
+			assertions: func(_ ourCloudHTTP.TokenFilterConfig, err error) {
 				require.Error(t, err)
 				require.Contains(
 					t, err.Error(), "invalid character",
@@ -132,14 +132,14 @@ func TestTokenFilterConfig(t *testing.T) {
 		{
 			name: "success",
 			setup: func() {
-				tokensFile, err := ioutil.TempFile("", "tls-*.key")
+				tokensFile, err := ioutil.TempFile("", "tokens.json")
 				require.NoError(t, err)
 				defer tokensFile.Close()
 				_, err = tokensFile.Write([]byte(`{"foo": "bar"}`))
 				require.NoError(t, err)
-				t.Setenv("SOURCE_TOKENS_PATH", tokensFile.Name())
+				t.Setenv("TOKENS_PATH", tokensFile.Name())
 			},
-			assertions: func(config cloudevents.TokenFilterConfig, err error) {
+			assertions: func(config ourCloudHTTP.TokenFilterConfig, err error) {
 				require.NoError(t, err)
 			},
 		},

@@ -1,9 +1,10 @@
-package cloudevents
+package http
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/brigadecore/brigade-foundations/crypto"
@@ -13,34 +14,25 @@ import (
 func TestNewTokenFilterConfig(t *testing.T) {
 	config, ok := NewTokenFilterConfig().(*tokenFilterConfig)
 	require.True(t, ok)
-	require.NotNil(t, config.hashedTokensBySource)
+	require.NotNil(t, config.hashedTokens)
 }
 
 func TestAddToken(t *testing.T) {
-	const testSource = "foo"
-	const testToken = "bar"
+	const testToken = "foo"
 	config, ok := NewTokenFilterConfig().(*tokenFilterConfig)
 	require.True(t, ok)
-	config.AddToken(testSource, testToken)
-	hashedToken, ok :=
-		config.hashedTokensBySource[testSource]
-	require.True(t, ok)
-	require.Equal(
-		t,
-		crypto.Hash(testSource, testToken),
-		hashedToken,
-	)
+	require.Empty(t, config.hashedTokens)
+	config.AddToken(testToken)
+	require.Len(t, config.hashedTokens, 1)
+	require.Equal(t, crypto.Hash("", testToken), config.hashedTokens[0])
 }
 
-func TestGetHashedToken(t *testing.T) {
-	const testSource = "foo"
-	testHashedToken := crypto.Hash(testSource, "bar")
-	config, ok := NewTokenFilterConfig().(*tokenFilterConfig)
-	require.True(t, ok)
-	config.hashedTokensBySource[testSource] = testHashedToken
-	hashedToken, ok := config.getHashedToken(testSource)
-	require.True(t, ok)
-	require.Equal(t, testHashedToken, hashedToken)
+func TestGetHashedTokens(t *testing.T) {
+	testHashedTokens := []string{"foo", "bar"}
+	config := tokenFilterConfig{
+		hashedTokens: testHashedTokens,
+	}
+	require.Equal(t, testHashedTokens, config.getHashedTokens())
 }
 
 func TestNewTokenFilter(t *testing.T) {
@@ -51,11 +43,9 @@ func TestNewTokenFilter(t *testing.T) {
 }
 
 func TestTokenFilter(t *testing.T) {
-	testEmptyConfig := NewTokenFilterConfig()
 	testConfig := NewTokenFilterConfig()
-	const testSource = "foo"
 	const testToken = "bar"
-	testConfig.AddToken(testSource, testToken)
+	testConfig.AddToken(testToken)
 	testCases := []struct {
 		name       string
 		filter     *tokenFilter
@@ -63,54 +53,13 @@ func TestTokenFilter(t *testing.T) {
 		assertions func(handlerCalled bool, r *http.Response)
 	}{
 		{
-			name: "cannot parse event from request",
-			filter: &tokenFilter{
-				config: testEmptyConfig,
-			},
-			setup: func() *http.Request {
-				// This request lacks anything that makes it look like a CloudEvent
-				req, err := http.NewRequest(http.MethodPost, "/", nil)
-				require.NoError(t, err)
-				return req
-			},
-			assertions: func(handlerCalled bool, r *http.Response) {
-				require.Equal(t, http.StatusInternalServerError, r.StatusCode)
-				require.False(t, handlerCalled)
-			},
-		},
-		{
-			name: "hashed token not found for source",
-			filter: &tokenFilter{
-				config: testEmptyConfig,
-			},
-			setup: func() *http.Request {
-				// This request looks like a CloudEvent, but the source isn't recognized
-				req, err := http.NewRequest(http.MethodPost, "/", nil)
-				require.NoError(t, err)
-				req.Header.Add("ce-id", "1234-1234-1234")
-				req.Header.Add("ce-specversion", "1.0")
-				req.Header.Add("ce-source", testSource)
-				req.Header.Add("ce-type", "myevent")
-				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", testToken))
-				return req
-			},
-			assertions: func(handlerCalled bool, r *http.Response) {
-				require.Equal(t, http.StatusForbidden, r.StatusCode)
-				require.False(t, handlerCalled)
-			},
-		},
-		{
-			name: "valid token provided as header",
+			name: "valid token provided in Authorization header",
 			filter: &tokenFilter{
 				config: testConfig,
 			},
 			setup: func() *http.Request {
 				req, err := http.NewRequest(http.MethodPost, "/", nil)
 				require.NoError(t, err)
-				req.Header.Add("ce-id", "1234-1234-1234")
-				req.Header.Add("ce-specversion", "1.0")
-				req.Header.Add("ce-source", testSource)
-				req.Header.Add("ce-type", "myevent")
 				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", testToken))
 				return req
 			},
@@ -120,18 +69,14 @@ func TestTokenFilter(t *testing.T) {
 			},
 		},
 		{
-			name: "valid token provided as query param",
+			name: "valid token provided as query parameter",
 			filter: &tokenFilter{
 				config: testConfig,
 			},
 			setup: func() *http.Request {
 				req, err := http.NewRequest(http.MethodPost, "/", nil)
 				require.NoError(t, err)
-				req.Header.Add("ce-id", "1234-1234-1234")
-				req.Header.Add("ce-specversion", "1.0")
-				req.Header.Add("ce-source", testSource)
-				req.Header.Add("ce-type", "myevent")
-				q := req.URL.Query()
+				q := url.Values{}
 				q.Set("access_token", testToken)
 				req.URL.RawQuery = q.Encode()
 				return req
@@ -149,10 +94,6 @@ func TestTokenFilter(t *testing.T) {
 			setup: func() *http.Request {
 				req, err := http.NewRequest(http.MethodPost, "/", nil)
 				require.NoError(t, err)
-				req.Header.Add("ce-id", "1234-1234-1234")
-				req.Header.Add("ce-specversion", "1.0")
-				req.Header.Add("ce-source", testSource)
-				req.Header.Add("ce-type", "myevent")
 				return req
 			},
 			assertions: func(handlerCalled bool, r *http.Response) {
@@ -161,17 +102,13 @@ func TestTokenFilter(t *testing.T) {
 			},
 		},
 		{
-			name: "wrong token provided",
+			name: "invalid token provided",
 			filter: &tokenFilter{
 				config: testConfig,
 			},
 			setup: func() *http.Request {
 				req, err := http.NewRequest(http.MethodPost, "/", nil)
 				require.NoError(t, err)
-				req.Header.Add("ce-id", "1234-1234-1234")
-				req.Header.Add("ce-specversion", "1.0")
-				req.Header.Add("ce-source", testSource)
-				req.Header.Add("ce-type", "myevent")
 				req.Header.Add("Authorization", "Bearer bogus-token")
 				return req
 			},

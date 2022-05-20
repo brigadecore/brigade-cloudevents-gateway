@@ -55,7 +55,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		tokenFilter = cloudevents.NewTokenFilter(config)
+		tokenFilter = ourCloudHTTP.NewTokenFilter(config)
 	}
 
 	var server libHTTP.Server
