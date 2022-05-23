@@ -65,7 +65,8 @@ func (t *tokenFilter) Decorate(handle http.HandlerFunc) http.HandlerFunc {
 				headerValue,
 				" ",
 				2,
-			); len(headerValueParts) == 2 && headerValueParts[0] == "Bearer" {
+			); len(headerValueParts) == 2 &&
+				strings.ToLower(headerValueParts[0]) == "bearer" {
 				providedToken = headerValueParts[1]
 			}
 		}
