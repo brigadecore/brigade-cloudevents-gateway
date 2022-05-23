@@ -1,11 +1,14 @@
 package http
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"strconv"
 	"time"
 
+	"github.com/brigadecore/brigade-foundations/version"
 	cloudHTTP "github.com/cloudevents/sdk-go/v2/protocol/http"
 )
 
@@ -28,6 +31,7 @@ func ValidateEventSource(w http.ResponseWriter, r *http.Request) {
 	// Complete the handshake asynchronously if a callback URL was provided...
 	if callbackURL :=
 		r.Header.Get("WebHook-Request-Callback"); callbackURL != "" {
+		headers.Set("User-Agent", userAgentHeaderValue())
 		// The spec is somewhat vague here. It says we can send either GET or POST,
 		// but it doesn't explicitly state that the receiver (the event source we're
 		// validating) has to accept both. To cover our bases and ensure
@@ -75,4 +79,13 @@ func executeSourceValidationCallback(method, url string, headers http.Header) {
 			err,
 		)
 	}
+}
+
+func userAgentHeaderValue() string {
+	return fmt.Sprintf("Go/%s (%s-%s) brigade-cloudevents-gateway/%s",
+		runtime.Version(),
+		runtime.GOARCH,
+		runtime.GOOS,
+		version.Version(),
+	)
 }
