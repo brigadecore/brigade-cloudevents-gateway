@@ -20,7 +20,7 @@ Prerequisites:
 
 * A Kubernetes cluster:
     * For which you have the `admin` cluster role
-    * That is already running Brigade 2
+    * That is already running Brigade 2.6.0+
     * Capable of provisioning a _public IP address_ for a service of type
       `LoadBalancer`. (This means you won't have much luck running the gateway
       locally in the likes of kind or minikube unless you're able and willing to
