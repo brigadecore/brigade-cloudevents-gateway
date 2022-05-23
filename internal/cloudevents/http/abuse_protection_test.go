@@ -93,6 +93,14 @@ func TestValidateEventSource(t *testing.T) {
 				}
 				s.Server = httptest.NewServer(http.HandlerFunc(
 					func(w http.ResponseWriter, r *http.Request) {
+						require.Equal(t, "*", r.Header.Get("WebHook-Allowed-Origin"))
+						require.Equal(
+							t,
+							strconv.Itoa(cloudHTTP.DefaultAllowedRate),
+							r.Header.Get("WebHook-Allowed-Rate"),
+						)
+						require.Equal(t, http.MethodPost, r.Header.Get("Allow"))
+						require.Equal(t, userAgentHeaderValue(), r.Header.Get("User-Agent"))
 						switch r.Method {
 						case http.MethodGet:
 							// Indicate the GET callback was received
