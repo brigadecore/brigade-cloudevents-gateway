@@ -62,25 +62,15 @@ _before_ running `tilt up`:
      --source brigade.sh/cloudevents
    ```
 
-   > ⚠️&nbsp;&nbsp;Contributions that automate the creation and configuration of
-   > the service account setup are welcome.
-
-1. Edit the `tokens` section of `charts/brigade-cloudevents-gateway/values.yaml`
-   to map cloudevent sources to tokens (shared secrets) that clients can use to
-   authenticate to your gateway. See
-   [this section](./README.md#2-install-the-cloudevents-gateway) of `README.md`
-   for more information.
-
-   > ⚠️&nbsp;&nbsp;Take care not to include modifications to the `values.yaml`
-   > file in any PRs you open.
-
 You can then run `tilt up` to build and deploy this gateway from source.
+
+> ⚠️&nbsp;&nbsp;Contributions that automate the creation and configuration of
+> the service account setup are welcome.
 
 ## Receiving Events Originating Locally
 
-You can send cloudevents from a local client to `http://localhost:31700/events`.
-The example below utilizes `curl`. Be sure to substitute an appropriate token
-from the previous section in the `Authorization` header.
+You can send CloudEvents from a local client to `http://localhost:31700/events`.
+The example does so using `curl`:
 
 ```shell
 $ curl -i -k -X POST \
@@ -88,17 +78,16 @@ $ curl -i -k -X POST \
     -H "ce-id: 1234-1234-1234" \
     -H "ce-source: example/uri" \
     -H "ce-type: example.type" \
-    -H "Authorization: Bearer MySharedSecret" \
+    -H "Authorization: Bearer insecure-dev-token" \
     http://localhost:31700/events
 ```
 
 ## Receiving Events from External Services
 
 Making the gateway that runs in your local, development-grade Kubernetes cluster
-visible to services running elsewhere that may deliver cloudevents can be
-challenging. To help ease this process, our `Tiltfile` has built-in support for
-exposing your local gateway using [ngrok](https://ngrok.com/). To take advantage
-of this:
+visible to CloudEvent producers running elsewhere can be challenging. To help
+ease this process, our `Tiltfile` has built-in support for exposing your local
+gateway using [ngrok](https://ngrok.com/). To take advantage of this:
 
 1. [Sign up](https://dashboard.ngrok.com/signup) for a free ngrok account.
 
@@ -115,7 +104,7 @@ of this:
 
 1. Use the URL `<ngrok URL>/events` and token(s) (shared secrets) from the
    [Running `tilt up` section](#running-tilt-up) when configuring external
-   services to deliver cloudevents to your gateway.
+   CloudEvent producers to deliver CloudEvents to your gateway.
 
 > ⚠️&nbsp;&nbsp;We cannot guarantee that ngrok will work in all environments,
 > especially if you are behind a corporate firewall.
