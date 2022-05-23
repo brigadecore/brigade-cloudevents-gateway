@@ -2,6 +2,7 @@ package cloudevents
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/brigadecore/brigade/sdk/v3"
@@ -34,17 +35,27 @@ func NewService(eventsClient sdk.EventsClient) Service {
 }
 
 func (s *service) Handle(ctx context.Context, event cloudEvents.Event) error {
-	brigadeEvent := sdk.Event{
-		Source: eventSource,
-		Type:   eventType,
-		Qualifiers: map[string]string{
-			"source": event.Source(),
-			"type":   event.Type(),
-		},
-		Payload: string(event.Data()),
-	}
-	_, err := s.eventsClient.Create(ctx, brigadeEvent, nil)
+	eventJSON, err := json.Marshal(event)
 	if err != nil {
+		err = errors.Wrap(err, "error marshaling cloud event to JSON")
+		// Nothing in cloudevents/sdk-go's HTTP protocol bindings seems to log the
+		// error we return, so we log it ourselves here.
+		log.Println(err)
+		return err
+	}
+	if _, err = s.eventsClient.Create(
+		ctx,
+		sdk.Event{
+			Source: eventSource,
+			Type:   eventType,
+			Qualifiers: map[string]string{
+				"source": event.Source(),
+				"type":   event.Type(),
+			},
+			Payload: string(eventJSON),
+		},
+		nil,
+	); err != nil {
 		err = errors.Wrap(err, "error creating brigade event from cloud event")
 		// Nothing in cloudevents/sdk-go's HTTP protocol bindings seems to log the
 		// error we return, so we log it ourselves here.
