@@ -69,7 +69,7 @@
 
    ```shell
    $ helm inspect values oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
-    --version v0.4.1 > ~/brigade-cloudevents-gateway-values.yaml
+    --version v1.0.0 > ~/brigade-cloudevents-gateway-values.yaml
    ```
 
 1. Edit `~/brigade-cloudevents-gateway-values.yaml`, making the following
@@ -108,7 +108,7 @@
 ```shell
 $ helm install brigade-cloudevents-gateway \
     oci://ghcr.io/brigadecore/brigade-cloudevents-gateway \
-    --version v0.4.1 \
+    --version v1.0.0 \
     --create-namespace \
     --namespace brigade-cloudevents-gateway \
     --values ~/brigade-cloudevents-gateway-values.yaml \
